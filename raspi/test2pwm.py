@@ -10,8 +10,8 @@ FORWARD  = 1
 BACKWORD = 2
 
 # 모터 채널
-CH1 = 0
-CH2 = 1
+CH1 = 0 #오른쪽
+CH2 = 1 #왼쪽
 
 # PIN 입출력 설정
 OUTPUT = 1
@@ -84,26 +84,26 @@ pwmB = setPinConfig(ENB, IN3, IN4)
 
     
 #제어 시작
-
-# 앞으로 80프로 속도로
-setMotor(CH1, 80, FORWARD)
-setMotor(CH2, 40, FORWARD)
-#5초 대기
-sleep(5)
+sleep(2)
+# # 앞으로 80프로 속도로
+# setMotor(CH1, 80, FORWARD)
+# setMotor(CH2, 80, FORWARD)
+# #5초 대기
+# sleep(2)
 
 # 뒤로 40프로 속도로
 setMotor(CH1, 40, BACKWORD)
-setMotor(CH2, 20, BACKWORD)
-sleep(5)
+setMotor(CH2, 40, BACKWORD)
+sleep(2)
 
-# 뒤로 100프로 속도로
-setMotor(CH1, 100, BACKWORD)
-setMotor(CH2, 50, BACKWORD)
-sleep(5)
+# # 뒤로 100프로 속도로
+# setMotor(CH1, 100, BACKWORD)
+# setMotor(CH2, 50, BACKWORD)
+# sleep(0.5)
 
 #정지 
 setMotor(CH1, 80, STOP)
-setMotor(CH2, 40, STOP)
+setMotor(CH2, 80, STOP)
 
 # 종료
 GPIO.cleanup()
