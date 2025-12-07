@@ -134,32 +134,86 @@ def is_node_pattern(left, center, right):
     return False
 
 
-def handle_node(node_index):
-    """
-    노드별 행동 정의하는 곳.
-    예: 1번 노드에서 좌회전, 2번 노드에서 우회전, 3번에서 정지 등등.
-    """
-    print(f"[NODE] 노드 {node_index} 진입 - 방향 탐색(제자리 회전) 시작")
+# 🗺️ 테스트용 하드코딩 경로 (수정 가능)
+TEST_ROUTE = {
+    1: "straight",  # 입구 -> 기점1
+    2: "left",      # 기점1 -> 기점2 (예시)
+    3: "right",     # 기점2 -> ...
+    10: "stop"      # 목적지
+}
 
-    # 제자리 회전 (예: 왼쪽으로 회전)
-    # CH1(우) 전진, CH2(좌) 후진
-    # 속도는 적절히 설정 (너무 빠르면 000을 놓칠 수 있음)
-    SEARCH_SPEED = 45
-    setMotor(CH1, SEARCH_SPEED, FORWARD)
-    setMotor(CH2, SEARCH_SPEED, BACKWORD)
-
-    # 000 (가드라인 안쪽)이 될 때까지 대기
+def turn_left():
+    print("⬅️ 좌회전 실행")
+    # 1. 교차점 벗어날 때까지 살짝 전진
+    setMotor(CH1, 40, FORWARD)
+    setMotor(CH2, 40, FORWARD)
+    sleep(0.3)
+    
+    # 2. 제자리 회전 (좌회전: 우측 전진, 좌측 후진)
+    setMotor(CH1, 50, FORWARD)
+    setMotor(CH2, 50, BACKWORD)
+    sleep(0.5) # 90도 돌 때까지 시간 조절 (튜닝 필요)
+    
+    # 3. 라인 찾기
     while True:
         left, center, right = read_line_sensors()
-        if is_inside_corridor(left, center, right):
-            print("[NODE] 길 찾음 (000 감지) - 회전 중지")
+        if center == LINE: # 중앙 센서가 라인 잡으면 정지
             break
         sleep(0.01)
     
-    # 회전 멈춤
+    # 4. 잠시 정지 후 출발
     setMotor(CH1, 0, STOP)
     setMotor(CH2, 0, STOP)
-    sleep(0.2) # 잠시 안정화
+    sleep(0.2)
+
+def turn_right():
+    print("➡️ 우회전 실행")
+    # 1. 교차점 벗어날 때까지 살짝 전진
+    setMotor(CH1, 40, FORWARD)
+    setMotor(CH2, 40, FORWARD)
+    sleep(0.3)
+    
+    # 2. 제자리 회전 (우회전: 좌측 전진, 우측 후진)
+    setMotor(CH1, 50, BACKWORD)
+    setMotor(CH2, 50, FORWARD)
+    sleep(0.5) # 90도 돌 때까지 시간 조절 (튜닝 필요)
+    
+    while True:
+        left, center, right = read_line_sensors()
+        if center == LINE:
+            break
+        sleep(0.01)
+        
+    setMotor(CH1, 0, STOP)
+    setMotor(CH2, 0, STOP)
+    sleep(0.2)
+
+def handle_node(node_index):
+    """
+    노드별 행동 정의하는 곳.
+    TEST_ROUTE에 정의된 대로 동작.
+    """
+    action = TEST_ROUTE.get(node_index, "straight")
+    print(f"[NODE] 노드 {node_index} 진입 - 동작: {action}")
+
+    if action == "stop":
+        print("🛑 목적지 도착! 정지")
+        setMotor(CH1, 0, STOP)
+        setMotor(CH2, 0, STOP)
+        # 종료를 위해 무한 대기
+        while True:
+            sleep(1)
+
+    elif action == "left":
+        turn_left()
+
+    elif action == "right":
+        turn_right()
+
+    elif action == "straight":
+        print("⬆️ 직진 통과")
+        # 직진은 메인 루프에서 처리하므로 여기서는 아무것도 안 함
+        pass
 
 
 def line_follow_with_nodes():
