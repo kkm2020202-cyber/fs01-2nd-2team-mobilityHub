@@ -4,9 +4,9 @@ import RPi.GPIO as GPIO
 from time import sleep
 
 # 모터 상태
-STOP    = 0
-FORWARD = 1
-BACKWORD = 2
+STOP     = 0
+FORWARD  = 1
+BACKWARD = 2
 
 # 모터 채널
 CH1 = 0  # 오른쪽
@@ -16,7 +16,7 @@ HIGH = 1
 LOW  = 0
 
 # =========================
-# 모터 실제 핀 정의 (네가 준 코드 그대로)
+# 모터 실제 핀 정의
 # =========================
 # PWM PIN
 ENA = 12 
@@ -25,15 +25,15 @@ ENB = 13
 # GPIO PIN
 IN1 = 25
 IN2 = 8  
-IN3 = 1 
-IN4 = 7  
+IN3 = 24 
+IN4 = 23 
 
 # =========================
 # 3채널 라인트레이서 모듈 핀 (예시, 반드시 실제 핀으로 수정)
 # =========================
 LS_LEFT   = 5    # 왼쪽 센서 (BCM 5 예시)
 LS_CENTER = 6    # 중앙 센서 (BCM 6 예시)
-LS_RIGHT  = 0   # 오른쪽 센서 (BCM 13 예시)
+LS_RIGHT  = 22   # 오른쪽 센서 (BCM 13 예시)
 
 # =========================
 # 센서 출력 논리
@@ -43,17 +43,23 @@ LS_RIGHT  = 0   # 오른쪽 센서 (BCM 13 예시)
 #   - 흰 바닥: HIGH(1)
 # 라고 가정.
 # 만약 반대라면 LINE/SPACE 값을 1/0 으로 바꿔줘라.
-LINE  = 0   # 선(검정) 감지
-SPACE = 1   # 바닥(선 없음)
+LINE  = 1   # 선(검정) 감지
+SPACE = 0   # 바닥(선 없음)
 
 # =========================
 # 속도 설정
 # =========================
-BASE_SPEED_RIGHT = 46  # 오른쪽 바퀴 기본 속도
-BASE_SPEED_LEFT  = 50  # 왼쪽 바퀴 기본 속도
+BASE_SPEED_RIGHT = 62  # 오른쪽 바퀴 기본 속도
+BASE_SPEED_LEFT  = 65  # 왼쪽 바퀴 기본 속도
 
-# 미세 보정용 (가드라인 가까워졌을 때)
-ADJUST_DELTA = 15      # 보정 강도 (원하면 10~20 사이로 바꿔보기)
+# PID 제어 상수
+Kp = 18.0  # 비례 게인 (현재 오차에 비례)
+Ki = 0.0   # 적분 게인 (누적 오차)
+Kd = 6.0   # 미분 게인 (오차 변화율)
+
+# PID 제어 변수
+previous_error = 0
+integral = 0
 
 
 def setPinConfig(EN, INA, INB):        
@@ -78,7 +84,7 @@ def setMotorControl(pwm, INA, INB, speed, stat):
     if stat == FORWARD:
         GPIO.output(INA, HIGH)
         GPIO.output(INB, LOW)
-    elif stat == BACKWORD:
+    elif stat == BACKWARD:
         GPIO.output(INA, LOW)
         GPIO.output(INB, HIGH)
     elif stat == STOP:
@@ -105,15 +111,83 @@ def read_line_sensors():
     left   = GPIO.input(LS_LEFT)
     center = GPIO.input(LS_CENTER)
     right  = GPIO.input(LS_RIGHT)
+            # 디버깅용
+    print(f"L={left}, C={center}, R={right}")
     return left, center, right
+
+
+def calculate_line_position(left, center, right):
+    """
+    센서 값으로 라인 위치 계산
+    실제 센서 패턴:
+    - 가드라인 안: L=0, C=0, R=0 (모두 선) → 위치=0
+    - 왼쪽 경계: L=0, C=1, R=1 (좌측만 선) → 위치=-1
+    - 오른쪽 경계: L=1, C=1, R=0 (우측만 선) → 위치=+1
+    - 중앙: L=0, C=1, R=0 → 위치=0 (노드)
+    
+    반환값: -1(왼쪽) ~ 0(중앙) ~ +1(오른쪽)
+    """
+    position = 0
+    
+    # 왼쪽 센서만 선 감지 (경계에 가까움)
+    if left == LINE and center == SPACE and right == SPACE:
+        position = -1
+    # 오른쪽 센서만 선 감지 (경계에 가까움)
+    elif left == SPACE and center == SPACE and right == LINE:
+        position = 1
+    # 중앙 센서만 선 감지 (중앙/노드)
+    elif left == SPACE and center == LINE and right == SPACE:
+        position = 0
+    # 왼쪽 경계 (L,C 선 감지)
+    elif left == LINE and center == LINE and right == SPACE:
+        position = -0.5
+    # 오른쪽 경계 (C,R 선 감지)
+    elif left == SPACE and center == LINE and right == LINE:
+        position = 0.5
+    # 모두 선 감지 (중앙)
+    elif left == LINE and center == LINE and right == LINE:
+        position = 0
+    # 모두 비어있음 (가드라인 안)
+    elif left == SPACE and center == SPACE and right == SPACE:
+        position = 0
+    
+    return position
+
+
+def pid_control(current_position):
+    """
+    PID 제어로 모터 보정값 계산
+    """
+    global previous_error, integral
+    
+    # 목표는 중앙(0), 현재 위치와의 차이가 오차
+    error = current_position
+    
+    # 적분 (누적 오차)
+    integral += error
+    # 적분 windup 방지
+    if integral > 100:
+        integral = 100
+    elif integral < -100:
+        integral = -100
+    
+    # 미분 (오차 변화율)
+    derivative = error - previous_error
+    previous_error = error
+    
+    # PID 출력
+    correction = (Kp * error) + (Ki * integral) + (Kd * derivative)
+    
+    return correction
 
 
 def is_inside_corridor(left, center, right):
     """
-    000 이면 가드라인 안쪽이라고 정의.
-    (양쪽 선이 센서 범위 밖에 있고, 가운데 흰 영역만 보는 구조)
+    가드라인 안쪽 판단
+    L=0,C=0,R=0 또는 L=1,C=1,R=1이면 가드라인 안
     """
-    return (left == SPACE) and (center == SPACE) and (right == SPACE)
+    return ((left == SPACE) and (center == SPACE) and (right == SPACE)) or \
+           ((left == LINE) and (center == LINE) and (right == LINE))
 
 
 def is_node_pattern(left, center, right):
@@ -137,29 +211,32 @@ def is_node_pattern(left, center, right):
 # 🗺️ 테스트용 하드코딩 경로 (수정 가능)
 TEST_ROUTE = {
     1: "straight",  # 입구 -> 기점1
-    2: "left",      # 기점1 -> 기점2 (예시)
-    3: "right",     # 기점2 -> ...
-    10: "stop"      # 목적지
+    # 2: "left",      # 기점1 -> 기점2 (예시)
+    # 3: "straight",     # 기점2 -> ...
+    # 4: "right",
+    # 5: "left",
+    # 6: "stop"# 목적지
 }
 
 def turn_left():
     print("⬅️ 좌회전 실행")
     # 1. 교차점 벗어날 때까지 살짝 전진
-    setMotor(CH1, 40, FORWARD)
-    setMotor(CH2, 40, FORWARD)
-    sleep(0.3)
+    setMotor(CH1, BASE_SPEED_RIGHT, FORWARD)
+    setMotor(CH2, BASE_SPEED_LEFT, FORWARD)
     
     # 2. 제자리 회전 (좌회전: 우측 전진, 좌측 후진)
-    setMotor(CH1, 50, FORWARD)
-    setMotor(CH2, 50, BACKWORD)
-    sleep(0.5) # 90도 돌 때까지 시간 조절 (튜닝 필요)
+    setMotor(CH1, BASE_SPEED_RIGHT, FORWARD)
+    setMotor(CH2, BASE_SPEED_LEFT, BACKWARD)
+    sleep(0.3) # 90도 돌 때까지 시간 조절 (튜닝 필요)
     
     # 3. 라인 찾기
     while True:
         left, center, right = read_line_sensors()
-        if center == LINE: # 중앙 센서가 라인 잡으면 정지
+        if center == SPACE and left == SPACE: # 중앙 센서가 라인 잡으면 정지
+            print("회전끝")
             break
-        sleep(0.01)
+            
+        
     
     # 4. 잠시 정지 후 출발
     setMotor(CH1, 0, STOP)
@@ -169,21 +246,22 @@ def turn_left():
 def turn_right():
     print("➡️ 우회전 실행")
     # 1. 교차점 벗어날 때까지 살짝 전진
-    setMotor(CH1, 40, FORWARD)
-    setMotor(CH2, 40, FORWARD)
-    sleep(0.3)
+    setMotor(CH1, BASE_SPEED_RIGHT, FORWARD)
+    setMotor(CH2, BASE_SPEED_LEFT, FORWARD)
     
     # 2. 제자리 회전 (우회전: 좌측 전진, 우측 후진)
-    setMotor(CH1, 50, BACKWORD)
-    setMotor(CH2, 50, FORWARD)
-    sleep(0.5) # 90도 돌 때까지 시간 조절 (튜닝 필요)
+    setMotor(CH1, BASE_SPEED_RIGHT, BACKWARD)
+    setMotor(CH2, BASE_SPEED_LEFT, FORWARD)
+    sleep(0.56) # 90도 돌 때까지 시간 조절 (튜닝 필요)
     
+    # 3. 라인 찾기
     while True:
         left, center, right = read_line_sensors()
-        if center == LINE:
+        if center == SPACE and right == SPACE:
+            print("회전끝")
             break
-        sleep(0.01)
         
+    # 4. 잠시 정지 후 출발
     setMotor(CH1, 0, STOP)
     setMotor(CH2, 0, STOP)
     sleep(0.2)
@@ -217,13 +295,12 @@ def handle_node(node_index):
 
 
 def line_follow_with_nodes():
+    global previous_error, integral
     node_count = 0
     in_node = False  # 노드 안에 있는 중인지 플래그
 
     while True:
         left, center, right = read_line_sensors()
-        # 디버깅용
-        print(f"L={left}, C={center}, R={right}")
 
         # 1) 노드 패턴인지 먼저 확인
         if is_node_pattern(left, center, right):
@@ -231,41 +308,53 @@ def line_follow_with_nodes():
             if not in_node:
                 node_count += 1
                 in_node = True
+                # PID 변수 초기화
+                previous_error = 0
+                integral = 0
                 handle_node(node_count)
                 continue
 
             # 노드 위에서는 원하는 만큼 속도 조정
             # 여기서는 일단 살짝 감속 직진
-            setMotor(CH1, BASE_SPEED_RIGHT // 2, FORWARD)
-            setMotor(CH2, BASE_SPEED_LEFT // 2, FORWARD)
+            setMotor(CH1, BASE_SPEED_RIGHT * 0.9, FORWARD)
+            setMotor(CH2, BASE_SPEED_LEFT * 0.9, FORWARD)
 
         else:
             # 노드 영역에서 나가면 플래그 해제
             in_node = False
 
-            # 2) 평소 주행: 000 = 가드라인 안쪽
+            # 2) 평소 주행: PID 제어 사용
             if is_inside_corridor(left, center, right):
+                # 가드라인 안: 직진 + PID 초기화
+                previous_error = 0
+                integral = 0
                 setMotor(CH1, BASE_SPEED_RIGHT, FORWARD)
                 setMotor(CH2, BASE_SPEED_LEFT, FORWARD)
-
-            # 3) 왼쪽 센서가 선을 감지 → 왼쪽 가드라인에 가까워짐 → 오른쪽으로 살짝 틀기
-            elif (left == LINE) and (right == SPACE):
-                # 오른쪽으로 보정: 왼쪽 속도 ↑, 오른쪽 속도 ↓
-                print("Turn Right (Left sensor hit)")
-                setMotor(CH1, BASE_SPEED_RIGHT - ADJUST_DELTA, FORWARD)
-                setMotor(CH2, BASE_SPEED_LEFT  + ADJUST_DELTA, FORWARD)
-
-            # 4) 오른쪽 센서가 선을 감지 → 오른쪽 가드라인에 가까워짐 → 왼쪽으로 살짝 틀기
-            elif (right == LINE) and (left == SPACE):
-                # 왼쪽으로 보정: 오른쪽 속도 ↑, 왼쪽 속도 ↓
-                print("Turn Left (Right sensor hit)")
-                setMotor(CH1, BASE_SPEED_RIGHT + ADJUST_DELTA, FORWARD)
-                setMotor(CH2, BASE_SPEED_LEFT  - ADJUST_DELTA, FORWARD)
-
-            # 5) 그 외 애매한 패턴(한쪽/양쪽 다 선 밟고 있음 등) → 일단 감속/정지
             else:
-                setMotor(CH1, 0, STOP)
-                setMotor(CH2, 0, STOP)
+                # 라인 위치 계산 및 PID 보정
+                position = calculate_line_position(left, center, right)
+                
+                # 모든 센서가 꺼져 있으면 직진
+                if position == 0 and (left == SPACE and center == SPACE and right == SPACE):
+                    previous_error = 0
+                    integral = 0
+                    setMotor(CH1, BASE_SPEED_RIGHT, FORWARD)
+                    setMotor(CH2, BASE_SPEED_LEFT, FORWARD)
+                else:
+                    correction = pid_control(position)
+                    
+                    # 보정값 적용 (correction이 양수면 오른쪽으로 치우침 → 왼쪽으로 보정)
+                    right_speed = BASE_SPEED_RIGHT - correction
+                    left_speed = BASE_SPEED_LEFT + correction
+                    
+                    # 속도 제한 (최소 20으로 완화)
+                    right_speed = max(20, min(100, right_speed))
+                    left_speed = max(20, min(100, left_speed))
+                    
+                    print(f"Pos={position:.1f}, Corr={correction:.1f}, R={right_speed:.0f}, L={left_speed:.0f}")
+                    
+                    setMotor(CH1, right_speed, FORWARD)
+                    setMotor(CH2, left_speed, FORWARD)
 
         sleep(0.01)  # 루프 딜레이
 
