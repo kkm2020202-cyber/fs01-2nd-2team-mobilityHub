@@ -32,14 +32,13 @@ public class UserController {
 
     @PostMapping("/create")
     public ResponseEntity<?> createUser(@RequestBody UserRequestDTO requestDTO){
-        System.out.println("받은 객체=>"+requestDTO);
         userService.write(requestDTO);
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
     @PostMapping("/login")
     public ResponseEntity<Map<String,String>> login(@RequestBody LoginRequestDTO loginRequestDTO){
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequestDTO.getUsername(),loginRequestDTO.getPassword());
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequestDTO.getUserId(),loginRequestDTO.getPassword());
         AuthenticationManager authenticationManager = managerBuilder.getObject();
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
         UserResponseDTO responseDTO = (UserResponseDTO) authentication.getPrincipal();
@@ -56,7 +55,7 @@ public class UserController {
                 .headers(httpHeaders)
                 .body(Map.of(
                         "accessToken",jwtToken,
-                        "username",responseDTO.getUsername(),
+                        "userId",responseDTO.getUserId(),
                         "roles",responseDTO.getRole()
                 ));
     }

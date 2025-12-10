@@ -16,13 +16,13 @@ import org.springframework.integration.annotation.Default;
 import java.time.LocalDateTime;
 
 @Entity
-@Table
+@Table(name = "user")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserEntity {
     @Id
-    private String username; // 유저아이디
+    private String userId; // 유저아이디
 
     @Column(nullable = false)
     private String password; // 패스워드
@@ -39,8 +39,8 @@ public class UserEntity {
     @Column
     private String role;
     // 회원가입시
-    public UserEntity(String username, String password, String name, String tel, String role) {
-        this.username = username;
+    public UserEntity(String userId, String password, String name, String tel, String role) {
+        this.userId = userId;
         this.password = password;
         this.name = name;
         this.tel = tel;

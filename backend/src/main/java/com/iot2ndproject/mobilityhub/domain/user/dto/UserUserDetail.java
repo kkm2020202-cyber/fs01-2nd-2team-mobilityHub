@@ -9,7 +9,7 @@ public class UserUserDetail extends User {
     private final UserResponseDTO responseDTO;
 
     public UserUserDetail(UserResponseDTO responseDTO, Collection<? extends GrantedAuthority> authorities) {
-        super(responseDTO.getUsername().toString(), responseDTO.getUserPassword(),authorities);
+        super(responseDTO.getUserId().toString(), responseDTO.getUserPassword(),authorities);
         this.responseDTO = responseDTO;
     }
     public UserResponseDTO getResponseDTO(){
