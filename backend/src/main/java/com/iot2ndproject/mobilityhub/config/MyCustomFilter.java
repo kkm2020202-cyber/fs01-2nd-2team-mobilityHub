@@ -13,7 +13,7 @@ import java.io.IOException;
 //요청 -> 필터 -> 서블릿
 // 서블릿 -> 필터 -> 응답
 
-@Component
+//@Component
 public class MyCustomFilter implements Filter {
 
     @Override
