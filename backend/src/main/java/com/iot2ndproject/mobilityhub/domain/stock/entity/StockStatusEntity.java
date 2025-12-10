@@ -8,12 +8,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.iot2ndproject.mobilityhub.domain.parking.entity.ParkingLotEntity;
+import com.iot2ndproject.mobilityhub.domain.parking.entity.ParkingEntity;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "StockStatusInfo")
+@Table(name = "stockStatus")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -36,7 +36,7 @@ public class StockStatusEntity {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "parkingLot")
-    private ParkingLotEntity parkingLot;
+    private ParkingEntity parkingLot;
 
     // 재고 수량 변동시 <- 필요없으면 삭제 또는 변경
     public StockStatusEntity(String inventoryId, int stockQantity){

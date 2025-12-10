@@ -15,11 +15,11 @@ import com.iot2ndproject.mobilityhub.domain.stock.entity.StockStatusEntity;
 
 
 @Entity
-@Table(name = "parkingLot")
+@Table(name = "parking")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ParkingLotEntity {
+public class ParkingEntity {
     @Id
     @Column(columnDefinition = "CHAR(3)")
     private String sectorId; // 섹터 ID

@@ -13,7 +13,7 @@ import com.iot2ndproject.mobilityhub.domain.user.entity.UserEntity;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "carInfo")
+@Table(name = "car")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
