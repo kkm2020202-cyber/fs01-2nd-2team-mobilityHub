@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 
 
 public interface UserDAO {
-    void save(UserEntity user);
-    UserEntity findByUsername(String username);
+    void create(UserEntity user);
+    UserEntity findById(String userId);
 }

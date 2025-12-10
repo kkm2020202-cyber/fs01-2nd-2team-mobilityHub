@@ -41,7 +41,7 @@ public class JWTSecurityConfig {
         http.csrf(csrf->csrf.disable())
                 //사용자정의필터를 어느 위치에서 실행할건지 등록하는 작업 필요
                 //특정 필터가 실행되기 전에 실행되도록 작업
-                .addFilterBefore(new CustomJWTFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
+//                .addFilterBefore(new CustomJWTFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .authorizeHttpRequests(auth-> auth
                         .requestMatchers("/user/create","/user/login").permitAll()
 //                        .requestMatchers("/customer/create").hasAnyRole("ADMIN")
@@ -74,6 +74,7 @@ public class JWTSecurityConfig {
 
         //cors정책에 대한 세팅 값을 추가
         corsConfigurationSource.addAllowedOrigin("http://localhost:5173");
+
         //허용할 http의 method
         corsConfigurationSource.addAllowedMethod("*"); //GET, POST, PUT, DELETE ... 등 모두 허용
         //허용할 헤더 설정 - 모든 헤더 허용

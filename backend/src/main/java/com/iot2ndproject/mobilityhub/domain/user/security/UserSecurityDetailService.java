@@ -26,7 +26,10 @@ public class UserSecurityDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
-        UserEntity userEntity = dao.findByUsername(id);
+        System.out.println("====================");
+        System.out.println(id);
+        System.out.println("====================");
+        UserEntity userEntity = dao.findById(id);
         if(userEntity==null){
             throw new RuntimeException("사용자가 없습니다. 인증실패");
         }

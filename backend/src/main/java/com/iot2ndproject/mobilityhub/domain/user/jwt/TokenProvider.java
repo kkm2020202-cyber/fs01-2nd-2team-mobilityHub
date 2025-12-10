@@ -58,7 +58,7 @@ public class TokenProvider {
         String userId = "";
         if(userInfo.getPrincipal() instanceof UserResponseDTO){
             UserResponseDTO dto = (UserResponseDTO) userInfo.getPrincipal();
-            userId = dto.getUsername();
+            userId = dto.getUserId();
         }else{
             userId = userInfo.getName(); //Authentication의 기본 메서드 호출
 

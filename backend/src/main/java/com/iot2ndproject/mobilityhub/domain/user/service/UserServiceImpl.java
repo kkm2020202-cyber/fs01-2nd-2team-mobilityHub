@@ -20,6 +20,6 @@ public class UserServiceImpl implements UserService {
         user.setPassword(encoder.encode(user.getPassword()));
         UserEntity entity = modelMapper.map(user, UserEntity.class);
         System.out.println(entity);
-        userDAO.save(entity);
+        userDAO.create(entity);
     }
 }
