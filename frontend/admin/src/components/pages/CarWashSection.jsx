@@ -1,20 +1,30 @@
 import React, { useEffect, useState } from "react";
 import "../style/CarWashSection.css";
 import { getCarWashing } from "../../api/carWashAPI";
+import { Clock, Droplets, CheckCircle } from "lucide-react";
 
 const CarWashSection = () => {
   // 세차장 데이터 목록
   const [carWashing, setCarWashing] = useState([]);
 
   useEffect(() => {
-    getCarWashing(3)
+    getCarWashing()
       .then((res) => setCarWashing(res))
       .catch((err) => console.error("차량 정보 조회 실패", err));
   }, []);
 
-  console.log(carWashing);
-  console.log("차량번호");
+  // 세차 작업 중인 차량만 따로 저장
+  const washingCar = carWashing.find((item) => item.carState === "carWashIn");
 
+  // 대기 중인 차량의 수
+  const waitCarList = carWashing.filter((item) => item.carState === "COMING");
+  const waitCarCount = waitCarList.length;
+
+  // 작업을 완료한 차량의 수
+  const completeCarList = carWashing.filter((item) => item.carState === "COMPLETE");
+  const completeCount = completeCarList.length;
+
+  console.log(washingCar);
   return (
     <div className="wash-page">
       <div className="statistics-card">
@@ -23,12 +33,10 @@ const CarWashSection = () => {
           <div className="card-item">
             <div>
               <p className="text">진행중</p>
-              <p className="count">(차량번호) 대</p>
+              <p className="count">차량번호: {washingCar ? washingCar.carNumber : "없음"}</p>
             </div>
             <div className="card-icon" style={{ backgroundColor: "#dbeafe" }}>
-              <p className="icon" style={{ backgroundColor: "blue" }}>
-                (i) {/* 아이콘 들어올 자리 */}
-              </p>
+              <Droplets className="icon" style={{ color: "blue" }} />
             </div>
           </div>
         </div>
@@ -38,12 +46,10 @@ const CarWashSection = () => {
           <div className="card-item">
             <div>
               <p className="text">대기중</p>
-              <p className="count">(차량수) 대</p>
+              <p className="count">{waitCarCount ? waitCarCount : 0} 대</p>
             </div>
             <div className="card-icon" style={{ backgroundColor: "#fef9c2" }}>
-              <p className="icon" style={{ backgroundColor: "orange" }}>
-                (i) {/* 아이콘 들어올 자리 */}
-              </p>
+              <Clock className="icon" style={{ color: "orange" }} />
             </div>
           </div>
         </div>
@@ -53,12 +59,10 @@ const CarWashSection = () => {
           <div className="card-item">
             <div>
               <p className="text">완료 건수</p>
-              <p className="count">(차량수) 대</p>
+              <p className="count">{completeCount ? completeCount : 0} 대</p>
             </div>
             <div className="card-icon" style={{ backgroundColor: "#dbfce7" }}>
-              <p className="icon" style={{ backgroundColor: "green" }}>
-                (i) {/* 아이콘 들어올 자리 */}
-              </p>
+              <CheckCircle className="icon" style={{ color: "green" }} />
             </div>
           </div>
         </div>
@@ -74,18 +78,30 @@ const CarWashSection = () => {
             <h3>이용 현황</h3>
           </div>
           <div className="list-content">
-            {carWashing.map((list) => (
-              <div key={list.id} className="list-data">
-                <div>
-                  {/* <div className="car-number">{carWashing[0].carNumber}</div> */}
-                  <div className="car-number">{list.carNumber}</div>
-                  <span className="state">(진행상황)</span>
+            {carWashing
+              .filter((item) => item.carState === "COMING" || item.carState === "carWashIn")
+              .map((list) => (
+                <div key={list.id} className="list-data">
+                  <div>
+                    {/* <div className="car-number">{carWashing[0].carNumber}</div> */}
+                    <div className="car-number">{list.carNumber}</div>
+                    <span className="state"></span>
+                  </div>
+                  <span className="job-state">
+                    <p
+                      className={`${
+                        list.carState === "carWashIn"
+                          ? "ing"
+                          : list.carState === "COMING"
+                          ? "wait"
+                          : ""
+                      }`}
+                    >
+                      {list.carState === "carWashIn" ? "진행중" : "대기중"}
+                    </p>
+                  </span>
                 </div>
-                <span className="job-state">
-                  <p className="state">(변환필요) 진행중</p>
-                </span>
-              </div>
-            ))}
+              ))}
           </div>
         </div>
       </div>
