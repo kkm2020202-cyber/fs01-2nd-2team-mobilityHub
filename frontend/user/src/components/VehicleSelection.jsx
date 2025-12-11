@@ -29,7 +29,7 @@ export default function VehicleSelection({ userId, onVehicleSelect }) {
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem("userId") || "{}");
+    const users = localStorage.getItem("userId");
 
     const newVehicle = {
       id: Date.now().toString(),
