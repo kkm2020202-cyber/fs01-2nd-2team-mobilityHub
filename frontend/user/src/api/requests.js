@@ -3,6 +3,11 @@ const requests = {
   //name:path
   userCreate: "/user/create",
   loginAction: "/user/login",
+  profile: "/user/profile",
+  carSave: "/car/save",
+  carList: "/car/list",
+  serviceRequest: "/service-request",
+  serviceRequestLatest: "/service-request/latest",
 };
 
 export default requests;

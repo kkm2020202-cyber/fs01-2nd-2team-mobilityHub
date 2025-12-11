@@ -1,6 +1,7 @@
 package com.iot2ndproject.mobilityhub.domain.user.controller;
 
 import com.iot2ndproject.mobilityhub.domain.user.dto.LoginRequestDTO;
+import com.iot2ndproject.mobilityhub.domain.user.dto.UserProfileDTO;
 import com.iot2ndproject.mobilityhub.domain.user.dto.UserRequestDTO;
 import com.iot2ndproject.mobilityhub.domain.user.dto.UserResponseDTO;
 import com.iot2ndproject.mobilityhub.domain.user.jwt.TokenProvider;
@@ -39,6 +40,17 @@ public class UserController {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
+    @GetMapping("/profile")
+    public ResponseEntity<UserProfileDTO> profile(@RequestParam("userId") String userId){
+        return ResponseEntity.ok(userService.getProfile(userId));
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateProfile(@RequestBody UserProfileDTO profileDTO){
+        userService.updateProfile(profileDTO);
+        return ResponseEntity.ok(HttpStatus.OK);
+    }
+
     @PostMapping("/login")
     public ResponseEntity<Map<String,String>> login(@RequestBody LoginRequestDTO loginRequestDTO){
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequestDTO.getUserId(),loginRequestDTO.getPassword());
@@ -52,7 +64,8 @@ public class UserController {
         }
 
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.add("Athorization","Bearer "+jwtToken);
+
+        httpHeaders.add("Authorization","Bearer "+jwtToken);
         System.out.println(responseDTO);
         return ResponseEntity.ok()
                 .headers(httpHeaders)

@@ -24,4 +24,9 @@ public class UserCarDAOImpl implements UserCarDAO{
     public UserCarEntity findByUserNumber(String userNumber) {
         return null;
     }
+
+    @Override
+    public java.util.List<UserCarEntity> findByUserId(String userId) {
+        return userCarRepository.findByUser_UserId(userId);
+    }
 }
