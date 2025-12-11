@@ -15,8 +15,13 @@ import java.util.List;
 public class CarWashController {
     private final CarWashService carWashService;
 
+//    @GetMapping("/select")
+//    public List<WashResponse> washing(@RequestParam("workId")int workId){
+//        return  carWashService.findByWokrId(workId);
+//    }
+
     @GetMapping("/select")
-    public List<WashResponse> washing(@RequestParam("workId")int workId){
-        return  carWashService.findByWokrId(workId);
+    public List<WashResponse> washing(){
+        return carWashService.findAll();
     }
 }

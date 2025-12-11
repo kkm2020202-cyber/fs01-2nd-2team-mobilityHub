@@ -17,25 +17,46 @@ public class CarWashServiceImpl implements CarWashService {
     private final CarWashDAO dao;
     private final ModelMapper modelMapper;
 
-    @Override
-    public List<WashResponse> findByWokrId(int workId) {
-        System.out.println("작업 장소 찾기"+workId);
+//    @Override
+//    public List<WashResponse> findByWokrId(int workId) {
+//        System.out.println("작업 장소 찾기"+workId);
+//
+//
+//
+//        // DB에서 workId로 1차 조회
+//        List<WorkInfoEntity> list = dao.findByWorkId(workId);
+//
+//        return list.stream()
+//                .filter(w -> w.getWork() != null &&
+//                        (w.getWork().getWorkId() == 3 || w.getWork().getWorkId() == 4))
+//                .filter(w -> w.getRequestTime().toLocalDate().isEqual(LocalDate.now()))
+//                .filter(w -> "carWashIn".equals(w.getCarState()))
+//                .map(w -> {
+//                    WashResponse dto = modelMapper.map(w, WashResponse.class);
+//                    if (w.getCar() != null) {
+//                        dto.setCarNumber(w.getCar().getCarNumber()); // 엔티티에서 번호 꺼내서 DTO에 넣기
+//                    }
+//                    return dto;
+//                })
+//                .collect(Collectors.toList());
+//        }
 
-        // DB에서 workId로 1차 조회
-        List<WorkInfoEntity> list = dao.findByWorkId(workId);
+
+    @Override
+    public List<WashResponse> findAll() {
+        List<WorkInfoEntity> list = dao.carWashing();
 
         return list.stream()
-                .filter(w -> w.getWork() != null &&
-                        (w.getWork().getWorkId() == 3 || w.getWork().getWorkId() == 4))
+                .filter(w -> w.getWork() != null
+                && (w.getWork().getWorkId() == 3 || w.getWork().getWorkId() == 4))
                 .filter(w -> w.getRequestTime().toLocalDate().isEqual(LocalDate.now()))
-                .filter(w -> "carWashIn".equals(w.getCarState()))
                 .map(w -> {
                     WashResponse dto = modelMapper.map(w, WashResponse.class);
-                    if (w.getCar() != null) {
-                        dto.setCarNumber(w.getCar().getCarNumber()); // 엔티티에서 번호 꺼내서 DTO에 넣기
+                    if(w.getCar() != null){
+                        dto.setCarNumber(w.getCar().getCarNumber());
                     }
                     return dto;
                 })
                 .collect(Collectors.toList());
-        }
+    }
 }

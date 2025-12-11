@@ -13,10 +13,14 @@ import java.util.List;
 public class CarWashDAOImpl implements CarWashDAO{
     private final CarWashRepository repository;
 
-    @Override
-    public List<WorkInfoEntity> findByWorkId(int workId)
-    {
-        return repository.findByWork_WorkId(workId);
-    }
+//    @Override
+//    public List<WorkInfoEntity> findByWorkId(int workId)
+//    {
+//        return repository.findByWork_WorkId(workId);
+//    }
 
+    @Override
+    public List<WorkInfoEntity> carWashing() {
+        return repository.findAll();
+    }
 }
