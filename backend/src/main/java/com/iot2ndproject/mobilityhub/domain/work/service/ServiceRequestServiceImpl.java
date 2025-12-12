@@ -1,8 +1,11 @@
 package com.iot2ndproject.mobilityhub.domain.work.service;
 
+import com.iot2ndproject.mobilityhub.domain.vehicle.dao.CarDAO;
 import com.iot2ndproject.mobilityhub.domain.work.dao.ServiceRequestDAO;
 import com.iot2ndproject.mobilityhub.domain.work.dto.ServiceRequestDTO;
 import com.iot2ndproject.mobilityhub.domain.work.entity.ServiceRequestEntity;
+import com.iot2ndproject.mobilityhub.domain.work.entity.WorkInfoEntity;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,11 +19,17 @@ import java.util.stream.Collectors;
 public class ServiceRequestServiceImpl implements ServiceRequestService {
 
     private final ServiceRequestDAO serviceRequestDAO;
-
+private final CarDAO carDAO;
     @Override
     @Transactional
     public ServiceRequestDTO create(ServiceRequestDTO dto) {
-        ServiceRequestEntity entity = ServiceRequestEntity.builder()
+        
+
+        WorkInfoEntity entity = new WorkInfoEntity();
+        entity.setCar(carDAO.findByCarNumber(dto.getCarNumber()));
+        entity.set
+        
+        .builder()
                 .userId(dto.getUserId())
                 .carNumber(dto.getCarNumber())
                 .services(String.join(",", dto.getServices()))
