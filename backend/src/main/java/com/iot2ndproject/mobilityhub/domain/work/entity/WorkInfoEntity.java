@@ -52,8 +52,8 @@ public class WorkInfoEntity {
     private ImageEntity image;
 
     // 사용자 요청 받았을 때
-    public WorkInfoEntity(CarEntity car, WorkEntity work){
-        this.car = car;
+    public WorkInfoEntity(UserCarEntity car, WorkEntity work){
+        this.userCar = car;
         this.work = work;
     }
 
