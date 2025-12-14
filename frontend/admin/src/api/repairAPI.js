@@ -2,9 +2,9 @@ import React from "react";
 import backendServer from "./backendServer";
 import request from "./requests";
 
-export const getRepair = async () => {
+export const repairPageAllList = async () => {
   try {
-    const response = await backendServer.get(`${request.repairAll}`);
+    const response = await backendServer.get(request.repairAll);
 
     return response.data;
   } catch (error) {

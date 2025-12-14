@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function MaintenanceHistoryModal({ onClose }) {
+export default function RepairHistoryModal({ onClose }) {
   const [histories] = useState([
     {
       id: "1",
@@ -97,7 +97,9 @@ export default function MaintenanceHistoryModal({ onClose }) {
         >
           <div>
             <h2 style={{ color: "#111827", margin: 0 }}>정비 내역</h2>
-            <p style={{ color: "#6b7280", marginTop: "4px" }}>완료된 정비 작업 목록</p>
+            <p style={{ color: "#6b7280", marginTop: "4px" }}>
+              완료된 정비 작업 목록
+            </p>
           </div>
           <button
             onClick={onClose}
@@ -111,18 +113,68 @@ export default function MaintenanceHistoryModal({ onClose }) {
         <div style={{ flex: 1, overflowY: "auto", padding: "24px" }}>
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead style={{ backgroundColor: "#f9fafb", position: "sticky", top: 0 }}>
+              <thead
+                style={{
+                  backgroundColor: "#f9fafb",
+                  position: "sticky",
+                  top: 0,
+                }}
+              >
                 <tr>
-                  <th style={{ padding: "12px", textAlign: "left", color: "#374151" }}>날짜</th>
-                  <th style={{ padding: "12px", textAlign: "left", color: "#374151" }}>차량번호</th>
-                  <th style={{ padding: "12px", textAlign: "left", color: "#374151" }}>
+                  <th
+                    style={{
+                      padding: "12px",
+                      textAlign: "left",
+                      color: "#374151",
+                    }}
+                  >
+                    날짜
+                  </th>
+                  <th
+                    style={{
+                      padding: "12px",
+                      textAlign: "left",
+                      color: "#374151",
+                    }}
+                  >
+                    차량번호
+                  </th>
+                  <th
+                    style={{
+                      padding: "12px",
+                      textAlign: "left",
+                      color: "#374151",
+                    }}
+                  >
                     서비스 종류
                   </th>
-                  <th style={{ padding: "12px", textAlign: "left", color: "#374151" }}>담당자</th>
-                  <th style={{ padding: "12px", textAlign: "left", color: "#374151" }}>
+                  <th
+                    style={{
+                      padding: "12px",
+                      textAlign: "left",
+                      color: "#374151",
+                    }}
+                  >
+                    담당자
+                  </th>
+                  <th
+                    style={{
+                      padding: "12px",
+                      textAlign: "left",
+                      color: "#374151",
+                    }}
+                  >
                     완료 시간
                   </th>
-                  <th style={{ padding: "12px", textAlign: "center", color: "#374151" }}>상태</th>
+                  <th
+                    style={{
+                      padding: "12px",
+                      textAlign: "center",
+                      color: "#374151",
+                    }}
+                  >
+                    상태
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -134,11 +186,21 @@ export default function MaintenanceHistoryModal({ onClose }) {
                       hover: { backgroundColor: "#f9fafb" },
                     }}
                   >
-                    <td style={{ padding: "12px", color: "#111827" }}>{history.date}</td>
-                    <td style={{ padding: "12px", color: "#111827" }}>{history.plateNumber}</td>
-                    <td style={{ padding: "12px", color: "#111827" }}>{history.serviceType}</td>
-                    <td style={{ padding: "12px", color: "#6b7280" }}>{history.technician}</td>
-                    <td style={{ padding: "12px", color: "#6b7280" }}>{history.completedTime}</td>
+                    <td style={{ padding: "12px", color: "#111827" }}>
+                      {history.date}
+                    </td>
+                    <td style={{ padding: "12px", color: "#111827" }}>
+                      {history.plateNumber}
+                    </td>
+                    <td style={{ padding: "12px", color: "#111827" }}>
+                      {history.serviceType}
+                    </td>
+                    <td style={{ padding: "12px", color: "#6b7280" }}>
+                      {history.technician}
+                    </td>
+                    <td style={{ padding: "12px", color: "#6b7280" }}>
+                      {history.completedTime}
+                    </td>
                     <td style={{ padding: "12px", textAlign: "center" }}>
                       <span
                         style={{
@@ -162,7 +224,11 @@ export default function MaintenanceHistoryModal({ onClose }) {
 
         {/* 푸터 */}
         <div
-          style={{ backgroundColor: "#f9fafb", borderTop: "1px solid #e5e7eb", padding: "24px" }}
+          style={{
+            backgroundColor: "#f9fafb",
+            borderTop: "1px solid #e5e7eb",
+            padding: "24px",
+          }}
         >
           <button
             onClick={onClose}
