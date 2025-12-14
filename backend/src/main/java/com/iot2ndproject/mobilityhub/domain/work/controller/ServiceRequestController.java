@@ -89,6 +89,9 @@ public class ServiceRequestController {
 
     /**
      * ServiceRequestDTO → MQTT rccar/{carId}/command 발행
+     * 
+     * 주의: 주차 옵션이 있는 경우, ServiceRequestServiceImpl에서 이미 빈자리를 확인하고 할당한 후
+     * 이 메서드가 호출됩니다. 따라서 여기서는 추가 빈자리 확인이 필요 없습니다.
      */
     private void publishRouteCommand(ServiceRequestDTO dto) throws Exception {
         if (dto == null || dto.getServices() == null || dto.getServices().isEmpty()) {
@@ -98,7 +101,8 @@ public class ServiceRequestController {
         // services 리스트를 work_type 형식으로 변환 (park,carwash 등)
         String workType = String.join(",", dto.getServices());
         
-        // 경로 계산
+        // 주차 옵션이 있는 경우, ServiceRequestServiceImpl에서 이미 빈자리를 확인하고 할당했음
+        // 여기서는 경로 계산만 수행
         List<Integer> route = routeService.calculateRoute(workType);
 
         // carId는 carNumber 또는 id 기반 (단순 예시)

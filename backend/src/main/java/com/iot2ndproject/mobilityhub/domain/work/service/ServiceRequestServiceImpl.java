@@ -1,5 +1,7 @@
 package com.iot2ndproject.mobilityhub.domain.work.service;
 
+import com.iot2ndproject.mobilityhub.domain.parking.entity.ParkingEntity;
+import com.iot2ndproject.mobilityhub.domain.parking.service.ParkingService;
 import com.iot2ndproject.mobilityhub.domain.parkingmap.repository.ParkingMapNodeRepository;
 import com.iot2ndproject.mobilityhub.domain.vehicle.entity.UserCarEntity;
 import com.iot2ndproject.mobilityhub.domain.vehicle.repository.UserCarRepository;
@@ -27,6 +29,7 @@ public class ServiceRequestServiceImpl implements ServiceRequestService {
     private final ParkingMapNodeRepository mapNodeRepository;
     private final UserCarRepository userCarRepository;
     private final WorkRepository workRepository;
+    private final ParkingService parkingService;
 
     @Override
     @Transactional
@@ -127,7 +130,25 @@ public class ServiceRequestServiceImpl implements ServiceRequestService {
             workInfo.setAdditionalRequest(dto.getAdditionalRequest());
         }
 
-        WorkInfoEntity saved = serviceRequestDAO.save(workInfo);
+        // 주차 옵션이 있으면 빈자리 확인 및 할당
+        if (hasPark) {
+            if (!parkingService.hasAvailableSpace()) {
+                throw new IllegalStateException("사용 가능한 주차 공간이 없습니다. 잠시 후 다시 시도해주세요.");
+            }
+            // 주차 공간 자동 할당 (첫 번째 빈 공간)
+            // WorkInfoEntity가 저장된 후에 할당해야 하므로 임시로 저장 후 업데이트
+            WorkInfoEntity tempSaved = serviceRequestDAO.save(workInfo);
+            try {
+                ParkingEntity allocatedParking = parkingService.allocateFirstAvailableSpace(tempSaved.getId());
+                tempSaved.setSectorId(allocatedParking);
+                workInfo = serviceRequestDAO.save(tempSaved);
+            } catch (Exception e) {
+                // 할당 실패 시 예외 전파
+                throw new IllegalStateException("주차 공간 할당에 실패했습니다: " + e.getMessage());
+            }
+        }
+
+        WorkInfoEntity saved = workInfo;
         return convertToDTO(saved);
     }
 
