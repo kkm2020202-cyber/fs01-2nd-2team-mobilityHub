@@ -6,12 +6,10 @@ import com.iot2ndproject.mobilityhub.domain.parking.entity.ParkingEntity;
 import com.iot2ndproject.mobilityhub.domain.parking.service.ParkingService;
 import com.iot2ndproject.mobilityhub.domain.parkingmap.repository.ParkingMapNodeRepository;
 import com.iot2ndproject.mobilityhub.domain.vehicle.entity.UserCarEntity;
-import com.iot2ndproject.mobilityhub.domain.vehicle.repository.UserCarRepository;
 import com.iot2ndproject.mobilityhub.domain.work.dao.ServiceRequestDAO;
 import com.iot2ndproject.mobilityhub.domain.work.dto.ServiceRequestDTO;
 import com.iot2ndproject.mobilityhub.domain.work.entity.WorkEntity;
 import com.iot2ndproject.mobilityhub.domain.work.entity.WorkInfoEntity;
-import com.iot2ndproject.mobilityhub.domain.work.repository.WorkRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,8 +30,6 @@ public class ServiceRequestServiceImpl implements ServiceRequestService {
 
     private final ServiceRequestDAO serviceRequestDAO;
     private final ParkingMapNodeRepository mapNodeRepository;
-    private final UserCarRepository userCarRepository;
-    private final WorkRepository workRepository;
     private final ParkingService parkingService;
     private final MyPublisher mqttPublisher;
     private final ObjectMapper objectMapper;
@@ -50,7 +46,7 @@ public class ServiceRequestServiceImpl implements ServiceRequestService {
         if (dto.getServices() == null || dto.getServices().isEmpty()) {
             throw new IllegalArgumentException("services is required");
         }
-        UserCarEntity userCar = userCarRepository.findByUser_UserIdAndCar_CarNumber(dto.getUserId(), dto.getCarNumber())
+        UserCarEntity userCar = serviceRequestDAO.findByUser_UserIdAndCar_CarNumber(dto.getUserId(), dto.getCarNumber())
                 .orElseThrow(() -> new IllegalArgumentException("UserCar not found for userId/carNumber"));
 
         // work.work_type은 아래 5개 타입 중 하나만 사용한다 (data.sql 기준)
@@ -110,7 +106,7 @@ public class ServiceRequestServiceImpl implements ServiceRequestService {
         }
 
         // work 엔티티는 DB seed(data.sql)에 존재하는 row를 work_id로 사용한다. (임의 생성 금지)
-        WorkEntity work = workRepository.findById(workId)
+        WorkEntity work = serviceRequestDAO.findWorkById(workId)
                 .orElseThrow(() -> new IllegalStateException("work_id not found in DB: " + workId + " (" + workType + ")"));
         if (work.getWorkType() == null || !work.getWorkType().equalsIgnoreCase(workType)) {
             throw new IllegalStateException("work table mismatch: id=" + workId + ", expected=" + workType + ", actual=" + work.getWorkType());
@@ -137,6 +133,9 @@ public class ServiceRequestServiceImpl implements ServiceRequestService {
             workInfo.setAdditionalRequest(dto.getAdditionalRequest());
         }
 
+        // WorkInfoEntity 저장 (주차 옵션 유무와 관계없이 저장 필요)
+        WorkInfoEntity saved;
+        
         // 주차 옵션이 있으면 빈자리 확인 및 할당
         if (hasPark) {
             if (!parkingService.hasAvailableSpace()) {
@@ -148,14 +147,16 @@ public class ServiceRequestServiceImpl implements ServiceRequestService {
             try {
                 ParkingEntity allocatedParking = parkingService.allocateFirstAvailableSpace(tempSaved.getId());
                 tempSaved.setSectorId(allocatedParking);
-                workInfo = serviceRequestDAO.save(tempSaved);
+                saved = serviceRequestDAO.save(tempSaved);
             } catch (Exception e) {
                 // 할당 실패 시 예외 전파
                 throw new IllegalStateException("주차 공간 할당에 실패했습니다: " + e.getMessage());
             }
+        } else {
+            // 주차 옵션이 없는 경우 단순 저장
+            saved = serviceRequestDAO.save(workInfo);
         }
 
-        WorkInfoEntity saved = workInfo;
         return convertToDTO(saved);
     }
 

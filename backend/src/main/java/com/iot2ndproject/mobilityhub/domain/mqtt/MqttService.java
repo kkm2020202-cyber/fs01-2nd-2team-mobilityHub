@@ -62,13 +62,8 @@ public class MqttService {
                     payload, 
                     new TypeReference<Map<String, Object>>() {}
             );
-            Integer nodeId = (Integer) positionData.get("nodeId");
+            int nodeId =(int) positionData.get("nodeId");
             String nodeName = (String) positionData.get("nodeName");
-            
-            if (nodeId == null) {
-                System.err.println("nodeId가 없습니다: " + payload);
-                return;
-            }
             
             System.out.println(">>> RC카 위치 신호 수신: carId=" + carId + ", nodeId=" + nodeId + ", nodeName=" + nodeName);
             
