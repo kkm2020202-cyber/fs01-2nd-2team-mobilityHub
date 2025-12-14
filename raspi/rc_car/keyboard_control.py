@@ -180,11 +180,10 @@ def print_help():
 # =========================
 
 if __name__ == "__main__":
-    global pwmA, pwmB
     GPIO.setmode(GPIO.BCM)
     GPIO.setwarnings(False)
     
-    # 모터 초기화
+    # 모터 초기화 (모듈 레벨 전역 변수에 할당)
     pwmA = setPinConfig(ENA, IN1, IN2)
     pwmB = setPinConfig(ENB, IN3, IN4)
     
