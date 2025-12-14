@@ -48,14 +48,10 @@ from tracertest import (
     LS_LEFT, LS_CENTER, LS_RIGHT
 )
 
-# 모터 PWM 객체 (전역 변수)
-pwmA = None
-pwmB = None
-
 # ==========================================
 # MQTT 설정
 # ==========================================
-BROKER_ADDRESS = "172.17.80.1"  # application.yaml의 MQTT 브로커 주소
+BROKER_ADDRESS = "192.168.35.183"  # application.yaml의 MQTT 브로커 주소
 PORT = 1883
 SUBSCRIBE_TOPIC_COMMAND = "rccar/+/command"  # 경로 명령 구독
 SUBSCRIBE_TOPIC_SERVICE = "rccar/+/service"   # 서비스 완료 신호 구독
@@ -310,8 +306,6 @@ def follow_route_with_node_detection():
     global current_route_index, is_waiting_service, is_waiting_call
     global auto_forward_mode, mqtt_client
     
-    global pwmA, pwmB
-    
     try:
         # GPIO 초기화 (한 번만)
         GPIO.setmode(GPIO.BCM)
@@ -415,8 +409,14 @@ def follow_route_with_node_detection():
                         else:
                             # 다음 노드로 이동
                             current_route_index += 1
-                            target_node_id = current_route[current_route_index]
-                            print(f"   다음 목표: {target_node_id} ({NODE_NAMES.get(target_node_id, '알 수 없음')})")
+                            if current_route_index < len(current_route):
+                                target_node_id = current_route[current_route_index]
+                                print(f"   다음 목표: {target_node_id} ({NODE_NAMES.get(target_node_id, '알 수 없음')})")
+                            else:
+                                # 경로 끝에 도달 (이론적으로는 발생하지 않아야 함)
+                                print("⚠️  경로 인덱스 오류: 경로 끝에 도달")
+                                target_node_id = None
+                                break
                             
                             # 자동 전진 모드일 때 자동으로 전진 재개
                             if auto_forward_mode:
