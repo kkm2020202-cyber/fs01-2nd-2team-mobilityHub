@@ -22,49 +22,66 @@ import java.util.List;
 public class EntryServiceImpl implements EntryService {
 
     private final ImageRepository imageRepository;
-    private final UserCarRepository carRepository;
+    private final UserCarRepository userCarRepository;
     private final ParkingRepository parkingRepository;
     private final WorkInfoRepository workInfoRepository;
 
+    /**
+     * ✅ 실제 입차 생성
+     */
     @Override
     public WorkInfoEntity handleEntry(OcrEntryRequest req) {
 
-        // 1) 이미지 저장
-        ImageEntity image = new ImageEntity(
-                req.getCameraId(),
-                req.getImagePath()
-        );
-        imageRepository.save(image);
+        // 1️⃣ 이미지 조회
+        ImageEntity image = imageRepository.findById(req.getImageId())
+                .orElseThrow(() -> new IllegalArgumentException("이미지 없음"));
 
-        // 2) 차량 조회
-        UserCarEntity car = carRepository.findByCarCarNumber(req.getCarNumber());
+        // 2️⃣ 차량 조회
+        UserCarEntity userCar =
+                userCarRepository.findByCarCarNumber(req.getCarNumber());
 
-        // 3) 카메라ID = 주차 구역 ID
-        ParkingEntity parking = parkingRepository
-                .findById(req.getCameraId())
-                .orElse(null);
+        // 3️⃣ 주차 구역
+        ParkingEntity parking =
+                parkingRepository.findById(req.getCameraId()).orElse(null);
 
-        // 4) 입차 기록 생성
+        // 4️⃣ 입차 기록 생성 (🔥 여기서만 WorkInfo 생성)
         WorkInfoEntity work = new WorkInfoEntity();
-        work.setUserCar(car);
+        work.setUserCar(userCar);
         work.setImage(image);
         work.setSectorId(parking);
 
         work.setEntryTime(LocalDateTime.now());
+        work.setExitTime(null); // 중요
         work.setRequestTime(LocalDateTime.now());
 
-        // 5) 저장
         workInfoRepository.save(work);
 
         return work;
     }
 
+    /**
+     * 📊 금일 입차 조회
+     */
     @Override
     public List<EntranceEntryView> getTodayEntry() {
-        LocalDate today = LocalDate.now();
-        LocalDateTime start = today.atStartOfDay();
-        LocalDateTime end = today.plusDays(1).atStartOfDay();
 
-        return workInfoRepository.findByEntryTimeBetween(start, end);
+        LocalDate today = LocalDate.now();
+
+        return workInfoRepository.findByEntryTimeBetween(
+                today.atStartOfDay(),
+                today.plusDays(1).atStartOfDay()
+        );
+    }
+
+    @Override
+    public void approveEntrance(Long workId) {
+
+        WorkInfoEntity work = workInfoRepository.findById(workId)
+                .orElseThrow(() -> new IllegalArgumentException("입차 정보 없음"));
+
+        // 👉 지금은 승인 시점에 할 게 이것뿐
+        // (나중에 차단기 열기, 상태 변경 등 추가 가능)
+
+        workInfoRepository.save(work);
     }
 }

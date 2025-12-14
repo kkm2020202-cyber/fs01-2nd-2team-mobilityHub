@@ -11,4 +11,5 @@ public interface EntryService {
     WorkInfoEntity handleEntry(OcrEntryRequest req);
 
     List<EntranceEntryView> getTodayEntry();
+    void approveEntrance(Long workId);
 }

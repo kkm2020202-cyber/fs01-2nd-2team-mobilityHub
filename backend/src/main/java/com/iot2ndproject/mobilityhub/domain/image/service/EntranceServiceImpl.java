@@ -18,12 +18,11 @@ public class EntranceServiceImpl implements EntranceService {
     private final WorkInfoDAO workInfoDAO;
 
     /**
-     * 📸 카메라 → OCR 인식 결과 수신
+     * 📸 OCR 수신 (Image만 저장)
      */
     @Override
     public EntranceResponseDTO receiveOcr(OcrEntryRequestDTO dto) {
 
-        // 1️⃣ Image 저장
         ImageEntity image = new ImageEntity();
         image.setCameraId(dto.getCameraId());
         image.setImagePath(dto.getImagePath());
@@ -31,14 +30,7 @@ public class EntranceServiceImpl implements EntranceService {
 
         imageDAO.save(image);
 
-        // 2️⃣ 입차 기록 생성
-        WorkInfoEntity work = new WorkInfoEntity();
-        work.setImage(image);
-
-
-        workInfoDAO.save(work);
-
-        return toResponse(work, image);
+        return toResponse(null, image);
     }
 
     /**
@@ -52,65 +44,43 @@ public class EntranceServiceImpl implements EntranceService {
     }
 
     /**
-     * ✅ 입차 승인
-     */
-    @Override
-    public void approveEntrance(Long workId) {
-        WorkInfoEntity work = workInfoDAO.findById(workId);
-
-        workInfoDAO.save(work);
-    }
-
-    /**
      * 🆕 최근 인식 번호판 조회
      */
     @Override
     public EntranceResponseDTO getLatestEntrance() {
 
         WorkInfoEntity work = workInfoDAO.findLatestWithImage();
-        ImageEntity image = work.getImage();
-
+        ImageEntity image = work != null ? work.getImage() : imageDAO.findLatest();
+        
         return toResponse(work, image);
     }
 
     /**
-     * 🔁 Entity → DTO 변환 (🔥 핵심 로직)
+     * 🔁 Entity → DTO
      */
     private EntranceResponseDTO toResponse(WorkInfoEntity work, ImageEntity image) {
 
         EntranceResponseDTO dto = new EntranceResponseDTO();
 
-        dto.setWorkId(work.getId());
         dto.setImageId((long) image.getImageId());
-
-        String ocrNumber = image.getOcrNumber();
-        String corrected = image.getCorrectedOcrNumber();
-
-        // 등록된 차량 번호
-        String registeredCarNumber = null;
-        if (work.getUserCar() != null && work.getUserCar().getCar() != null) {
-            registeredCarNumber = work.getUserCar().getCar().getCarNumber();
-        }
-
-        // 실제 비교 대상 번호
-        String detectedNumber = corrected != null ? corrected : ocrNumber;
-
-        dto.setOcrNumber(ocrNumber);
-        dto.setCorrectedOcrNumber(corrected);
-        dto.setRegisteredCarNumber(registeredCarNumber);
-        dto.setCarNumber(detectedNumber);
-
-        // 🔥 match 판단
-        dto.setMatch(
-                registeredCarNumber != null &&
-                        detectedNumber != null &&
-                        registeredCarNumber.equals(detectedNumber)
-        );
-
         dto.setImagePath(image.getImagePath());
         dto.setCameraId(image.getCameraId());
+        dto.setOcrNumber(image.getOcrNumber());
+        dto.setCorrectedOcrNumber(image.getCorrectedOcrNumber());
         dto.setTime(image.getRegDate());
 
+        if (work != null && work.getUserCar() != null && work.getUserCar().getCar() != null) {
+            String registered = work.getUserCar().getCar().getCarNumber();
+            String detected = image.getCorrectedOcrNumber() != null
+                    ? image.getCorrectedOcrNumber()
+                    : image.getOcrNumber();
+
+            dto.setRegisteredCarNumber(registered);
+            dto.setMatch(registered.equals(detected));
+            dto.setWorkId(work.getId());
+        } else {
+            dto.setMatch(false);
+        }
 
         return dto;
     }

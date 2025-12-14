@@ -19,4 +19,9 @@ public class ImageDAOImpl implements ImageDAO{
         return imageRepository.findById((imageId))
                 .orElseThrow(() -> new IllegalArgumentException("이미지 없음"));
     }
+
+    @Override
+    public ImageEntity findLatest() {
+        return null;
+    }
 }
