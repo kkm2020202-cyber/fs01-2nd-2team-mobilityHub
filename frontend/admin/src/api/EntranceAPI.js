@@ -7,13 +7,8 @@ import request from "./requests";
 
 // 금일 입차 조회
 export const getTodayEntry = async () => {
-  try {
-    const res = await backendServer.get(request.todayEntry);
-    return res.data;
-  } catch (error) {
-    console.error("금일 입차 조회 오류:", error);
-    return [];
-  }
+  const res = await backendServer.get("/entrance/today/entry");
+  return res.data;
 };
 
 // 금일 출차 조회
