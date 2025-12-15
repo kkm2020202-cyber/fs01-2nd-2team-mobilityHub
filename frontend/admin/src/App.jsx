@@ -14,7 +14,6 @@ import RepairSection from "./components/pages/RepairSection";
 import AdminSection from "./components/pages/AdminSection";
 import ParkingSection from "./components/pages/ParkingSection";
 import AdminLogin from "./components/pages/AdminLogin";
-import { ProfileSection } from "./components/pages/ProfileSection";
 
 function App() {
   return (
@@ -35,8 +34,7 @@ function App() {
               <Route path="/repair" element={<RepairSection />} />
               <Route path="/parking" element={<ParkingSection />} />
               <Route path="*" element={<Navigate to="/" replace />} />
-              <Route path="/profile" element={<ProfileSection/>} />
-            </Routes> 
+            </Routes>
           </main>
         </div>
       </div>

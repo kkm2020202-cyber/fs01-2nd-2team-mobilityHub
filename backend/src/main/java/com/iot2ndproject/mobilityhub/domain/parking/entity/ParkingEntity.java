@@ -15,6 +15,8 @@ import com.iot2ndproject.mobilityhub.domain.admin.entity.AdminEntity;
 
 
 
+
+
 @Entity
 @Table(name = "parking")
 @Data
@@ -31,9 +33,6 @@ public class ParkingEntity {
     private String state; // 빈공간 유무
 
     @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "adminId")
+    @JoinColumn(name = "admin_id")
     private AdminEntity admin; // 관리자ID(fk)
-
-    @OneToMany(mappedBy = "sectorId")
-    List<StockStatusEntity> stockStatus = new ArrayList<>();
 }
