@@ -1,27 +1,34 @@
 // 백엔드 통신을 위한 path
 
 const request = {
-  carWashing: "/carwash/select",
-
-  // 입출구 API 추가
-  todayEntry: "/entrance/today/entry",
-  todayExit: "/entrance/today/exit",
-
-  // 작업 전체 목록
+  // 메인
   workList: "/entrance/work/list",
   todayWork: "/entrance/work/today",
 
-  // 정비소 api
-  // 정비소 월별 금액
-  repairAmount: "/repair/report/amount",
+  // 입출구
+  todayEntry: "/entrance/today/entry",
+  todayExit: "/entrance/today/exit",
 
-  // 1) 정비 서비스 차량 모든 조회
+  // 주차장
+  parkingList: "/parking/list",
+  parkStatusUpdateList: "/parking/update",
+
+  // 세차장
+  carWashing: "/carwash/select",
+
+  //정비소
   repairAll: "/repair/list",
   reportList: "/repair/report/list",
   createStock: "/repair/create",
   updateStock: "/repair/detail/update",
   deleteStock: "/repair/detail/delete",
   writeReport: "/report/write",
+
+  // 통계
+  repairAmount: "/repair/report/amount",
+
+  // 관리자 조회
+  adminList: "/admin/list",
 };
 
 export default request;

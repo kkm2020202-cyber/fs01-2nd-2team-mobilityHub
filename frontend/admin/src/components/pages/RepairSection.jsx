@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import "../style/RepairSection.css";
 import useMqtt from "../hook/useMqtt";
-import { repairPageAllList, reportAllList, writeReport } from "../../api/repairAPI";
+import {
+  repairPageAllList,
+  reportAllList,
+  writeReport,
+} from "../../api/repairAPI";
 import { Check } from "lucide-react";
 import RepairReportModal from "../modal/RepairReportModal";
 import RepairHistoryModal from "../modal/RepairHistoryModal";
@@ -83,7 +87,10 @@ const RepairSection = () => {
 
   // 대기 중인 차량
   const waitForWark = repairList.find(
-    (repair) => repair.carState !== CAR_STATE.REPAIRING && repair.entryTime == null && repair.exitTime == null
+    (repair) =>
+      repair.carState !== CAR_STATE.REPAIRING &&
+      repair.entryTime == null &&
+      repair.exitTime == null
   );
 
   const handleCompleteWork = () => {
@@ -141,7 +148,9 @@ const RepairSection = () => {
 
       // 오늘 완료된 차량 제외
       const hasReportToday = reportList.some(
-        (report) => report.reportId.startsWith(todayStr) && report.carNumber === list.car_number
+        (report) =>
+          report.reportId.startsWith(todayStr) &&
+          report.carNumber === list.car_number
       );
       if (hasReportToday) return null;
 
@@ -179,7 +188,9 @@ const RepairSection = () => {
           <div className="between-position">
             <div>
               <p className="working-info">현재 작업차량</p>
-              <p className="info-details insert">{workingCar ? workingCar.car_number : "작업중인 차량 없음"}</p>
+              <p className="info-details insert">
+                {workingCar ? workingCar.car_number : "작업중인 차량 없음"}
+              </p>
             </div>
             <div className="icon-box" style={{ backgroundColor: "#dbeafe" }}>
               {/* icon들어갈 자리, class=icon color:#2563eb*/}
@@ -191,7 +202,9 @@ const RepairSection = () => {
           <div className="between-position">
             <div>
               <p className="working-info">대기중</p>
-              <p className="info-details insert">{waitForWark ? waitForWark + "건" : "대기 중인 차량 없음"}</p>
+              <p className="info-details insert">
+                {waitForWark ? waitForWark + "건" : "대기 중인 차량 없음"}
+              </p>
             </div>
             <div className="icon-box" style={{ backgroundColor: "#fef9c3" }}>
               {/* icon 들어갈 자리, class=icon color:#ca8a04 */}
@@ -208,10 +221,16 @@ const RepairSection = () => {
             <div className="icon-box" style={{ backgroundColor: "#fee2e2" }}>
               {/* icon 들어갈 자리, class=icon color:#dc2626 */}
               <div className="lift-btn-wrapper">
-                <button className="lift-btn up" onClick={() => publish("parking/web/repair/lift", "up")}>
+                <button
+                  className="lift-btn up"
+                  onClick={() => publish("parking/web/repair/lift", "up")}
+                >
                   ▲
                 </button>
-                <button className="lift-btn down" onClick={() => publish("parking/web/repair/lift", "down")}>
+                <button
+                  className="lift-btn down"
+                  onClick={() => publish("parking/web/repair/lift", "down")}
+                >
                   ▼
                 </button>
               </div>
@@ -267,13 +286,16 @@ const RepairSection = () => {
           </div>
 
           {/* 카드 본문: 현재 작업 차량 추가 요청사항 */}
-          {repairList.filter((rep) => rep.carStateNodeId === CAR_STATE.REPAIRING).length > 0 ? (
+          {repairList.filter(
+            (rep) => rep.carStateNodeId === CAR_STATE.REPAIRING
+          ).length > 0 ? (
             repairList
               .filter((rep) => rep.carStateNodeId === CAR_STATE.REPAIRING)
               .map((rep) => (
                 <div key={rep.id} className="repair-list">
                   <p className="add-repair">추가 요청사항</p>
-                  {rep.additionalRequests && rep.additionalRequests.length > 0 ? (
+                  {rep.additionalRequests &&
+                  rep.additionalRequests.length > 0 ? (
                     rep.additionalRequests.map((req, index) => (
                       <div key={index} className="repair-request">
                         {req}
@@ -290,7 +312,10 @@ const RepairSection = () => {
 
           {/* 카드 하단: 정비 내역 보기 버튼 */}
           <div className="checklist-footer">
-            <button className="view-details-btn" onClick={() => setShowHistoryModal(true)}>
+            <button
+              className="view-details-btn"
+              onClick={() => setShowHistoryModal(true)}
+            >
               정비 내역 보기
             </button>
           </div>
@@ -304,9 +329,17 @@ const RepairSection = () => {
               <h3>부품 재고 현황</h3>
               <div className="stockHeader-right">
                 <span className="outOfStock">
-                  {stockList.filter((stock) => stock.stockQuantity < stock.minStockQuantity).length}개 항목 재고 부족
+                  {
+                    stockList.filter(
+                      (stock) => stock.stockQuantity < stock.minStockQuantity
+                    ).length
+                  }
+                  개 항목 재고 부족
                 </span>
-                <button className="createStock" onClick={() => setShowCreateStockModal(true)}>
+                <button
+                  className="createStock"
+                  onClick={() => setShowCreateStockModal(true)}
+                >
                   재고 추가
                 </button>
               </div>
@@ -330,10 +363,14 @@ const RepairSection = () => {
                 {stockList.map((res) => (
                   <tr key={res.inventoryId} className="stock-list-tr">
                     <td className="stock-list-td">
-                      <span className="stock-product-name">{res.productName}</span>
+                      <span className="stock-product-name">
+                        {res.productName}
+                      </span>
                     </td>
                     <td className="stock-list-td">
-                      <span className="stock-category">{res.stockCategory}</span>
+                      <span className="stock-category">
+                        {res.stockCategory}
+                      </span>
                     </td>
                     <td className="stock-list-td text-center">
                       {res.stockQuantity}
@@ -360,7 +397,10 @@ const RepairSection = () => {
                     </td>
                     <td className="stock-list-td">
                       <div className="stockDetail-box">
-                        <button onClick={() => openStockModal(res)} className="stock-detail-button">
+                        <button
+                          onClick={() => openStockModal(res)}
+                          className="stock-detail-button"
+                        >
                           상세보기
                         </button>
                       </div>
@@ -374,13 +414,19 @@ const RepairSection = () => {
       </div>
       {/* 정비완료 모달 */}
       {showReportModal && (
-        <RepairReportModal onClose={() => setShowReportModal(false)} onSubmit={handleReportSubmit} data={repairList} />
+        <RepairReportModal
+          onClose={() => setShowReportModal(false)}
+          onSubmit={handleReportSubmit}
+          data={repairList}
+        />
       )}
       {/* 정비내역 보기 모달 */}
       {showHistoryModal && (
         <RepairHistoryModal
           onClose={() => setShowHistoryModal(false)} // 모달 닫기
-          data={repairList.filter((rep) => rep.carStateNodeId === CAR_STATE.REPAIRING)} // 현재 작업 차량 데이터 전달
+          data={repairList.filter(
+            (rep) => rep.carStateNodeId === CAR_STATE.REPAIRING
+          )} // 현재 작업 차량 데이터 전달
         />
       )}
       {/* 재고id별 상세보기 모달 */}
@@ -394,7 +440,10 @@ const RepairSection = () => {
       )}
       {/* 재고 추가 모달 */}
       {showCreateStockModal && (
-        <StockCreateModal onClose={() => setShowCreateStockModal(false)} refreshStockList={refreshStockList} />
+        <StockCreateModal
+          onClose={() => setShowCreateStockModal(false)}
+          refreshStockList={refreshStockList}
+        />
       )}
     </div>
   );
