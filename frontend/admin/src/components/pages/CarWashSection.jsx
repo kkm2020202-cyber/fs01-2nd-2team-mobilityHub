@@ -6,7 +6,7 @@ import CarWashBarChart from "../chart/CarWashBarChart";
 import useMqtt from "../hook/useMqtt";
 
 // MQTT 브로커 주소
-const BROKER_URL = "ws://192.168.137.1:9001";
+const BROKER_URL = "ws://192.168.14.39:9001";
 //const BROKER_URL = import.meta.env.VITE_BROKER_URL;
 
 // 차량 상태 상수

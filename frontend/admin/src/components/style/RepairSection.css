@@ -55,6 +55,35 @@
   overflow: hidden;
 }
 
+.lift-btn-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lift-btn {
+  width: 36px;
+  height: 28px;
+  border-radius: 6px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.lift-btn.up {
+  background-color: #dc2626;
+  color: white;
+}
+
+.lift-btn.down {
+  background-color: #2563eb;
+  color: white;
+}
+
+.lift-btn:hover {
+  opacity: 0.85;
+}
+
 .usage-status-container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

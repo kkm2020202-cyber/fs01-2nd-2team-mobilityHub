@@ -7,6 +7,7 @@ import paho.mqtt.publish as publisher
 from water import PumpController
 from threading import Thread
 import time
+from repair_lift import PCA9685
 
 class MqttWorker:
     # 생성자에서 mqtt통신할 수 있는 객체생성, 필요한 다양한 객체생성, 콜백함수등록
@@ -22,6 +23,9 @@ class MqttWorker:
         self.is_streaming = False 
         
         # 세차장 - 물펌프
+        
+        # 리프트
+        self.pca = PCA9685()
         
         
     # broker 연결 후 실행될 콜백 - rc가 0이면 성공접속, 1이면 실패
@@ -54,6 +58,14 @@ class MqttWorker:
                 
                 Thread(
                     target=self.carwash_job).start()
+                
+        elif message.topic == "parking/web/repair/lift":
+            if myval == "up":
+                print(message.topic, myval)
+                self.pca.lift_up(channel=0, speed=0.05)
+            elif myval == "down":
+                print(message.topic, myval)
+                self.pca.lift_down(channel=0, speed=0.05)
             
             
             
@@ -64,6 +76,7 @@ class MqttWorker:
                 frame = self.camera.getStreaming()
                 ##publisher.single("parking/web/carwash/cam", frame, hostname="192.168.14.38")
                 publisher.single("parking/web/carwash/cam", frame, hostname="192.168.137.1")
+                publisher.single("parking/web/repair/cam", frame, hostname="192.168.14.39") # 작업하는 사람의 브로커 주소 넣기
                 
                 
             except Exception as e:
