@@ -17,15 +17,11 @@ public class EntranceController {
     private final EntranceService entranceService;
     private final EntryService entryService;
 
-    // 📸 카메라 → OCR 결과 수신
     @PostMapping("/ocr")
     public ResponseEntity<?> ocr(@RequestBody OcrEntryRequestDTO dto) {
-        return ResponseEntity.ok(
-                entranceService.receiveOcr(dto)
-        );
+        return ResponseEntity.ok(entranceService.receiveOcr(dto));
     }
 
-    // ✏️ OCR 번호 수정 (관리자)
     @PutMapping("/image/{imageId}/ocr")
     public ResponseEntity<?> updateOcr(
             @PathVariable Long imageId,
@@ -35,17 +31,14 @@ public class EntranceController {
         return ResponseEntity.ok().build();
     }
 
-    // ✅ 입차 승인
     @PostMapping("/{workId}/approve")
     public ResponseEntity<?> approve(@PathVariable Long workId) {
         entryService.approveEntrance(workId);
         return ResponseEntity.ok().build();
     }
-    // 🆕 최근 인식 번호판 조회
+
     @GetMapping("/latest")
     public ResponseEntity<EntranceResponseDTO> latest() {
-        return ResponseEntity.ok(
-                entranceService.getLatestEntrance()
-        );
+        return ResponseEntity.ok(entranceService.getLatestEntrance());
     }
 }

@@ -43,6 +43,12 @@ const useMqtt = (brokerUrl) => {
         setImageState(`data:image/jpeg;base64,${base64Image}`);
         const payload = message.toString();
         console.log(payload);
+
+        if (topic == "parking/web/entrance/cam") {
+          const base64Image = message.toString();
+          setImageState(`data:image/jpeg;base64,${base64Image}`);
+          console.log(payload);
+        }
       } else if (topic === "heaves/home/web/sensor/dht11") {
         const payload = message.toString();
         //console.log(payload);

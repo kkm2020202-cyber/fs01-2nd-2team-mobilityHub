@@ -13,13 +13,8 @@ export const getTodayEntry = async () => {
 
 // 금일 출차 조회
 export const getTodayExit = async () => {
-  try {
-    const res = await backendServer.get(request.todayExit);
-    return res.data;
-  } catch (error) {
-    console.error("금일 출차 조회 오류:", error);
-    return [];
-  }
+  const res = await backendServer.get("/entrance/today/exit");
+  return res.data;
 };
 
 /* =========================

@@ -15,16 +15,16 @@ public interface WorkInfoRepository extends JpaRepository<WorkInfoEntity, Long> 
             LocalDateTime end
     );
     List<WorkInfoEntity> findByUserCar_User_UserIdOrderByRequestTimeDesc(String userId);
-    List<WorkInfoEntity> findByUserCar_User_UserIdAndWorkIsNotNullOrderByRequestTimeDesc(String userId);
 
-
-    Optional<WorkInfoEntity> findTopByImageIsNotNullOrderByRequestTimeDesc();
-    
     // carNumber로 최신 작업 정보 조회
     Optional<WorkInfoEntity> findTopByUserCar_Car_CarNumberOrderByRequestTimeDesc(String carNumber);
-    
+
+    List<WorkInfoEntity>
+    findByUserCar_User_UserIdAndWorkIsNotNullOrderByRequestTimeDesc(String userId);
     // carNumber로 진행 중인 최신 작업 정보 조회 (work_id가 null이 아닌 것만)
     Optional<WorkInfoEntity> findTopByUserCar_Car_CarNumberAndWorkIsNotNullOrderByRequestTimeDesc(String carNumber);
-    Optional<EntranceEntryView> findTopByImageIsNotNullOrderByRequestTimeDesc();
+    Optional<EntranceEntryView>
+    findTopByImageIsNotNullOrderByRequestTimeDesc();
+    boolean existsByImage_ImageId(Integer imageId);
 
 }

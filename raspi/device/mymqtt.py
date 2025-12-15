@@ -64,6 +64,7 @@ class MqttWorker:
                 frame = self.camera.getStreaming()
                 ##publisher.single("parking/web/carwash/cam", frame, hostname="192.168.14.38")
                 publisher.single("parking/web/carwash/cam", frame, hostname="192.168.137.1")
+                #publisher.single("parking/web/carwash/cam", frame, hostname="192.168.14.56")
                 
                 
             except Exception as e:
@@ -88,7 +89,7 @@ class MqttWorker:
             print("브로커 연결 시작하기")
             #self.client.connect("192.168.45.38", 1883, 60)
             self.client.connect("192.168.137.1", 1883, 60)
-            
+            #self.client.connect("192.168.14.56", 1883, 60)
 
             mymqtt_obj = Thread(target=self.client.loop_forever)
             mymqtt_obj.start()
