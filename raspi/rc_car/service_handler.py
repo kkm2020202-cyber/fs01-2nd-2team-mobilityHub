@@ -51,7 +51,7 @@ from tracertest import (
 # ==========================================
 # MQTT 설정
 # ==========================================
-BROKER_ADDRESS = "192.168.35.183"  # application.yaml의 MQTT 브로커 주소
+BROKER_ADDRESS = "192.168.14.69"  # application.yaml의 MQTT 브로커 주소
 PORT = 1883
 SUBSCRIBE_TOPIC_COMMAND = "rccar/+/command"  # 경로 명령 구독
 SUBSCRIBE_TOPIC_SERVICE = "rccar/+/service"   # 서비스 완료 신호 구독
