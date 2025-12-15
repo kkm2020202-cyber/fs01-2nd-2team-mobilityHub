@@ -1,5 +1,7 @@
 // 백엔드 통신을 위한 path
 
+import { sendComplete } from "./repairAPI";
+
 const request = {
   // 메인
   workList: "/entrance/work/list",
@@ -15,15 +17,15 @@ const request = {
 
   // 세차장
   carWashing: "/carwash/select",
-
+  sendWashComplete : "/carwash/complete",
   //정비소
   repairAll: "/repair/list",
   reportList: "/repair/report/list",
   createStock: "/repair/create",
   updateStock: "/repair/detail/update",
   deleteStock: "/repair/detail/delete",
-  writeReport: "/report/write",
-
+  writeReport: "repair/report/write",
+  sendRepairComplete: "/repair/complete",
   // 통계
   repairAmount: "/repair/report/amount",
 
